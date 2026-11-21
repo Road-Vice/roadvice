@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ROAD VICE — Palm City</title>
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="game"></div>
+
+<div id="hud" class="hidden">
+  <div id="topbar">
+    <div id="money">$0</div>
+    <div id="ring" class="hidden">💍 marié</div>
+    <div id="mission">Suis le faisceau rose</div>
+    <div id="clock">06:00 <span id="wicon"></span><span id="fps"></span></div>
+  </div>
+  <div id="stars"></div>
+  <div id="status">
+    <div id="healthwrap"><div id="health"></div></div>
+    <div class="needbar"><div id="hunger"></div><span>🍖</span></div>
+    <div class="needbar"><div id="thirst"></div><span>💧</span></div>
+    <div class="needbar"><div id="energy"></div><span>💤</span></div>
+    <div id="weapon">👊 Poings — ∞</div>
+  </div>
+  <div id="speedo">
+    <div id="speed">0</div>
+    <div id="unit">km/h</div>
+  </div>
+  <canvas id="minimap" width="230" height="230"></canvas>
+  <div id="notif"></div>
+  <div id="prompt" class="hidden"></div>
+  <div id="cross" class="hidden">+</div>
+  <div id="bloodfx"></div>
+  <div id="controls">F voiture · E portes/maison · clic tirer · 1-8 armes · T téléphone · H se rendre · C caméra · MAJ courir · 🎮 manette compatible</div>
+  <div id="bigmsg" class="hidden"><h2></h2><p></p></div>
+</div>
+
+<div id="touch" class="hidden">
+  <div id="joy"><div id="joy-knob"></div></div>
+  <div id="tbtns">
+    <button data-t="fire" class="tbtn big">🔫</button>
+    <button data-t="run" class="tbtn">🏃</button>
+    <button data-t="use" class="tbtn">✋</button>
+    <button data-t="crouch" class="tbtn">🎯</button>
+    <button data-t="phone" class="tbtn">📱</button>
+    <button data-t="cam" class="tbtn">🎥</button>
+    <button data-t="wpn" class="tbtn">🔄</button>
+  </div>
+</div>
+
+<div id="phone" class="hidden">
+  <div id="p-screen">
+    <div id="p-status"><span id="p-clock">06:00</span><span>PalmTel</span><span>▮▮▮ 5G</span></div>
+    <div id="p-content"></div>
+    <div id="p-home">⌂</div>
+  </div>
+</div>
+
+<div id="title">
+  <h1>ROAD <span>VICE</span></h1>
+  <p class="sub">Palm City : une ville vivante, des étoiles, un téléphone et des clés.</p>
+  <button id="play">▶&nbsp;JOUER</button>
+  <p class="hint" id="thint">ZQSD/WASD · F voiture · E portes · clic tirer · T téléphone · H se rendre · MAJ courir</p>
+  <p class="loading" id="loading">Chargement de Palm City…</p>
+</div>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>
