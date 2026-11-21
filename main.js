@@ -895,10 +895,10 @@ function animate() {
   if (started) {
     const inCar = !!player.vehicle;
     if (isTouch && !inCar) {
-      input.forward = joyVec.y < -0.2;
-      input.back = joyVec.y > 0.25;
-      input.left = joyVec.x < -0.2;
-      input.right = joyVec.x > 0.2;
+      input.forward = joyVec.y < -0.15;
+      input.back = joyVec.y > 0.2;
+      input.left = joyVec.x < -0.15;
+      input.right = joyVec.x > 0.15;
     } else if (isTouch && inCar) {
       input.throttle = joyVec.y < -0.15 ? 1 : (joyVec.y > 0.25 ? -1 : 0);
       input.steer = Math.max(-1, Math.min(1, joyVec.x));
@@ -1137,6 +1137,10 @@ document.getElementById('play').addEventListener('click', () => {
   started = true;
   hud.notify('Bienvenue à Palm City. F pour ta voiture, T pour le téléphone.');
   hud.setMission('Suis le faisceau rose — ou explore et achète ta villa');
+  if (isTouch) {
+    hud.big('📱 COMMANDES', 'Glisse ton pouce sur la molette ⚪ en bas à gauche pour marcher. Glisse sur le reste de l\'écran pour tourner la tête. Le bouton ✋ entre dans une voiture.');
+    setTimeout(() => { if (!player.busted && !player.wasted) hud.big(null); }, 7000);
+  }
 });
 document.getElementById('title').classList.add('ready');
 animate();
