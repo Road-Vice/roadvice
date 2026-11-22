@@ -93,17 +93,27 @@ function drawCity(ctx, size, detailed) {
 
 function windowTextures() {
   const variants = [];
-  for (let v = 0; v < 2; v++) {
+  const STYLES = [
+    { base: '#565064', fond: '#a9c8dd', alt: '#7d93a6', lit: '#ffd27a' },
+    { base: '#3d4352', fond: '#7d93a6', alt: '#57707f', lit: '#9fd8ff' },
+    { base: '#7a6a58', fond: '#c9b18f', alt: '#a08a6c', lit: '#ffbe5c' },
+    { base: '#2f333d', fond: '#3b4d63', alt: '#2c3a4a', lit: '#c8ecff' }
+  ];
+  for (let v = 0; v < STYLES.length; v++) {
+    const st = STYLES[v];
     const W = 256, map = makeCanvas(W), lit = makeCanvas(W);
     const m = map.getContext('2d'), l = lit.getContext('2d');
-    m.fillStyle = v ? '#3d4352' : '#565064'; m.fillRect(0, 0, W, W);
+    m.fillStyle = st.base; m.fillRect(0, 0, W, W);
     l.fillStyle = '#000'; l.fillRect(0, 0, W, W);
+    m.fillStyle = 'rgba(0,0,0,0.18)';
+    for (let y = 0; y < W; y += 32) m.fillRect(0, y + 30, W, 2);
     const cols = 8, rows = 10, cw = W / cols, ch = W / rows;
     for (let x = 0; x < cols; x++) for (let y = 0; y < rows; y++) {
       const px = x * cw + cw * 0.18, py = y * ch + ch * 0.2, pw = cw * 0.64, ph = ch * 0.55;
-      m.fillStyle = Math.random() < 0.5 ? '#a9c8dd' : '#7d93a6'; m.fillRect(px, py, pw, ph);
+      m.fillStyle = Math.random() < 0.5 ? st.fond : st.alt; m.fillRect(px, py, pw, ph);
+      m.fillStyle = 'rgba(255,255,255,0.28)'; m.fillRect(px, py, pw, 2);
       if (Math.random() < 0.4) {
-        l.fillStyle = Math.random() < 0.7 ? '#ffd27a' : '#9fd8ff';
+        l.fillStyle = Math.random() < 0.75 ? st.lit : '#9fd8ff';
         l.fillRect(px, py, pw, ph);
       }
     }
@@ -173,15 +183,16 @@ export function buildWorld(scene, getPlayerZ) {
 
   const maps = windowTextures();
   const windowMats = [];
-  for (let v = 0; v < 2; v++) {
+  for (let v = 0; v < maps.length / 2; v++) {
     windowMats.push(new THREE.MeshStandardMaterial({
       map: maps[v * 2], emissiveMap: maps[v * 2 + 1],
       emissive: 0xffffff, emissiveIntensity: 0, roughness: 0.85
     }));
   }
+  const TINTS = [0xcfcfcf, 0xd8cbb4, 0xc4cfd8, 0xd4c0c0, 0xbfcfc2, 0xded6c2].map(c => new THREE.Color(c));
 
   const dummy = new THREE.Object3D();
-  const builds = [[], []], roofs = [];
+  const builds = [[], [], [], []], roofs = [];
   const beachBlocks = [];
   const CENTER = (GRID - 1) / 2;
 
@@ -199,7 +210,7 @@ export function buildWorld(scene, getPlayerZ) {
       const cx = bx + a * cw + cw / 2, cz = bz + b * ch + ch / 2;
       const w = cw - inset * 2, d = ch - inset * 2;
       const h = Math.min(112, (9 + Math.random() * 15) * mul);
-      builds[Math.random() < 0.5 ? 0 : 1].push({ cx, cz, w, d, h });
+      builds[Math.floor(Math.random() * windowMats.length)].push({ cx, cz, w, d, h });
       roofs.push({ cx, cz, w, d, h });
       colliders.add({ minX: cx - w / 2, maxX: cx + w / 2, minZ: cz - d / 2, maxZ: cz + d / 2, h });
       if (h > 62) tallBuildings.push({ cx, cz, w, d, h });
@@ -208,13 +219,14 @@ export function buildWorld(scene, getPlayerZ) {
 
   const boxGeo = new THREE.BoxGeometry(1, 1, 1);
   boxGeo.translate(0, 0.5, 0);
-  for (let v = 0; v < 2; v++) {
+  for (let v = 0; v < windowMats.length; v++) {
     const list = builds[v];
     const inst = new THREE.InstancedMesh(boxGeo, windowMats[v], list.length);
     list.forEach((b, n) => {
       dummy.position.set(b.cx, 0, b.cz); dummy.scale.set(b.w, b.h, b.d);
       dummy.rotation.set(0, 0, 0); dummy.updateMatrix();
       inst.setMatrixAt(n, dummy.matrix);
+      inst.setColorAt(n, TINTS[(Math.random() * TINTS.length) | 0]);
     });
     inst.castShadow = true; inst.receiveShadow = true;
     group.add(inst);
@@ -226,6 +238,20 @@ export function buildWorld(scene, getPlayerZ) {
     dummy.updateMatrix(); roofInst.setMatrixAt(n, dummy.matrix);
   });
   group.add(roofInst);
+
+  const acs = roofs.filter(() => Math.random() < 0.55);
+  const acGeo = new THREE.BoxGeometry(1, 1, 1);
+  acGeo.translate(0, 0.5, 0);
+  const acInst = new THREE.InstancedMesh(acGeo,
+    new THREE.MeshStandardMaterial({ color: 0x8a8f96, roughness: 0.9, metalness: 0.3 }), acs.length);
+  acs.forEach((b, n) => {
+    dummy.position.set(b.cx + (Math.random() - 0.5) * Math.max(2, b.w - 5), b.h + 0.6, b.cz + (Math.random() - 0.5) * Math.max(2, b.d - 5));
+    dummy.scale.set(1.6 + Math.random() * 1.4, 0.9 + Math.random() * 0.8, 1.4 + Math.random() * 1.6);
+    dummy.rotation.set(0, Math.random() * Math.PI, 0);
+    dummy.updateMatrix(); acInst.setMatrixAt(n, dummy.matrix);
+  });
+  dummy.rotation.set(0, 0, 0);
+  group.add(acInst);
 
   const NEONS = ['VICE', 'PALM', 'OZ', 'CLUB', 'MOTEL', 'HOTEL', 'ROXY', 'NEON', '24H', 'BAR'];
   const NEONCOLORS = ['#ff2d95', '#35f0e0', '#ffb400', '#8f6bff'];
@@ -367,7 +393,7 @@ export function buildWorld(scene, getPlayerZ) {
   const doorGeo = new THREE.BoxGeometry(1.5, 2.5, 0.14);
   doorGeo.translate(0.78, 1.25, 0);
   const doorMat = new THREE.MeshStandardMaterial({ color: 0x5c3d24, roughness: 0.6, metalness: 0.15 });
-  const allBuilds = [...builds[0], ...builds[1]];
+  const allBuilds = builds.flat();
   const doors = [];
   const doorCenters = [];
   for (let i = 0; i < allBuilds.length && doors.length < 90; i++) {
