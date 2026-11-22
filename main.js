@@ -18,6 +18,7 @@ import { Weather } from './weather.js';
 import { Animals } from './animals.js';
 
 const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+const smallPhone = isTouch && Math.min(screen.width || 9999, screen.height || 9999) < 480;
 if (isTouch) document.getElementById('thint').textContent =
   'Joystick gauche bouger · glisse à droite pour viser · boutons à droite';
 
@@ -33,8 +34,8 @@ renderer.toneMappingExposure = 1.05;
 app.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0xbcd9ec, 0.0013);
-const camera = new THREE.PerspectiveCamera(66, window.innerWidth / window.innerHeight, 0.1, 3500);
+scene.fog = new THREE.FogExp2(0xbcd9ec, smallPhone ? 0.0022 : (isTouch ? 0.0018 : 0.0013));
+const camera = new THREE.PerspectiveCamera(66, window.innerWidth / window.innerHeight, 0.1, isTouch ? 1500 : 3500);
 
 try {
   const pmrem = new THREE.PMREMGenerator(renderer);
@@ -79,15 +80,15 @@ player.pos.set(10, 0, 4);
 const starterCar = new Vehicle(scene, 'sports', new THREE.Vector3(10, 0, 12), 0, false);
 player.parked.push(starterCar);
 
-const traffic = new Traffic(scene, world.colliders, 36, 38);
-const peds = new Peds(scene, isTouch ? 110 : 240);
+const traffic = new Traffic(scene, world.colliders, isTouch ? (smallPhone ? 16 : 26) : 36, isTouch ? (smallPhone ? 12 : 20) : 38);
+const peds = new Peds(scene, isTouch ? (smallPhone ? 60 : 110) : 240);
 const police = new Police(scene, fx, audio);
 const hud = new HUD();
 const phone = new Phone(onPhoneAction);
 const weather = new Weather(scene);
 weather.notify = (msg) => hud.notify(msg);
 weather.onThunder = () => audio.thunder();
-const animals = new Animals(scene, isTouch ? 6 : 10, isTouch ? 18 : 32);
+const animals = new Animals(scene, isTouch ? (smallPhone ? 4 : 6) : 10, isTouch ? (smallPhone ? 12 : 18) : 32);
 phone.setAssets(world.minimapCanvas);
 phone.player = player;
 phone.properties = world.PROPERTIES;
@@ -366,7 +367,7 @@ function updateSky(dt) {
   moon.intensity = night * 0.3;
   moon.position.set(player.pos.x + 60, 130, player.pos.z + 50);
   scene.fog.color.copy(tmpA);
-  scene.fog.density = (0.0013 + night * 0.0004) * weather.fogMul;
+  scene.fog.density = ((smallPhone ? 0.0022 : isTouch ? 0.0018 : 0.0013) + night * 0.0004) * weather.fogMul;
 
   sun.position.copy(player.pos).addScaledVector(sunDir, 170);
   sun.position.y = Math.max(18, sun.position.y);
@@ -862,8 +863,9 @@ function animate() {
   qualityT += dt;
   if (qualityT > 1.5) {
     qualityT = 0;
-    if (fpsS < 55 && resScale > 0.55) {
-      renderer.setPixelRatio(resScale = Math.max(0.55, resScale * 0.88));
+    const resFloor = smallPhone ? 0.45 : 0.55;
+    if (fpsS < (smallPhone ? 42 : 55) && resScale > resFloor) {
+      renderer.setPixelRatio(resScale = Math.max(resFloor, resScale * 0.88));
       applyRes();
     } else if (fpsS > 74 && resScale < resCap) {
       renderer.setPixelRatio(resScale = Math.min(resCap, resScale * 1.06));
