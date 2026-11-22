@@ -160,10 +160,16 @@ function svgCover(c){
   return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
 }
 
+function slug(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
+function photoUrl(c){
+  const fam=slug((c.modele||'').split(' ')[0])||'base';
+  return 'https://cdn.imagin.studio/getimage?customer=img&make='+slug(c.marque)+'&modelFamily='+fam+'&angle=23&zoomType=fullscreen&width=640&paintdescription=column-galaxy-black';
+}
 function coverHTML(c){
-  const img=c.image?c.image:svgCover(c);
+  const svg=svgCover(c);
   const badge=c.statut==='À venir'?'<span class="badge soon">À venir</span>':(c.note?`<span class="badge">★ ${String(c.note).replace('.',',')}</span>`:'');
-  return `<div class="cover"><img src="${esc(img)}" alt="" loading="lazy" onerror="this.style.display='none'">${badge}</div>`;
+  const src=c.image?c.image:photoUrl(c);
+  return `<div class="cover" style="background-image:url('${svg}');background-size:cover;background-position:center"><img src="${esc(src)}" alt="" loading="lazy" onerror="this.remove()">${badge}</div>`;
 }
 
 function go(t){ vue=t; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t)); render(); }
@@ -317,7 +323,7 @@ function renderDetail(){
   }
   document.getElementById('modal').innerHTML=`
     <div class="detail-head">
-      <div class="detail-cover"><img src="${esc(c.image||svgCover(c))}" onerror="this.style.display='none'"></div>
+      <div class="detail-cover" style="background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22300%22%20height%3D%22188%22%3E%3Crect%20width%3D%22300%22%20height%3D%22188%22%20fill%3D%22%230f0f14%22%2F%3E%3C%2Fsvg%2F%3E');background-size:cover"><img src="${esc(c.image||photoUrl(c))}" onerror="this.remove()"></div>
       <div class="detail-body">
         <h2>${esc(nom(c))}</h2>
         <div class="sub">${esc(c.type||'')} · ${esc(c.pays||'')} · ${c.puissance?c.puissance+' ch':'—'} · ${prixTxt(c)}</div>
