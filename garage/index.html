@@ -123,7 +123,7 @@ tr:hover td{background:var(--panel)}
 <script>
 const SEED=(typeof GARS_DB!=='undefined')?GARS_DB:[];
 
-const SKEY='garage-noir-v1';
+const SKEY='garage-noir-v2';
 let db=JSON.parse(localStorage.getItem(SKEY)||'null');
 if(!db){
   db={cars:SEED.map((c,i)=>({...c,id:c.id||'c'+i})),entries:[]};
