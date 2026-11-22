@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garage Noir — Base de voitures</title>
+<style>
+:root{
+  --bg:#08080a; --panel:#121216; --panel2:#1a1a20; --border:#26262e;
+  --text:#ececf1; --muted:#8f8f9e; --accent:#e11d48; --accent2:#f43f5e;
+  --gold:#fbbf24; --green:#34d399; --blue:#60a5fa;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{position:sticky;top:0;z-index:20;background:rgba(8,8,10,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:14px 26px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+header .logo{font-size:1.35rem;font-weight:800;letter-spacing:.5px}
+header .logo em{font-style:normal;background:linear-gradient(90deg,var(--accent),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+#globalSearch{flex:1;min-width:220px;max-width:480px;background:var(--panel);border:1px solid var(--border);color:var(--text);padding:10px 16px;border-radius:24px;font-size:.95rem;outline:none}
+#globalSearch:focus{border-color:var(--accent)}
+nav{display:flex;gap:4px;overflow-x:auto}
+nav button{background:none;border:none;color:var(--muted);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:.92rem;white-space:nowrap;transition:.15s}
+nav button:hover{color:var(--text)}
+nav button.active{background:var(--panel2);color:var(--text);font-weight:600}
+main{max-width:1200px;margin:0 auto;padding:24px 26px 80px}
+h2.section{font-size:1.25rem;margin:8px 0 16px;display:flex;align-items:center;gap:10px}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.filters select{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:.9rem}
+.btn{background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;font-size:.93rem;font-weight:600;transition:.15s}
+.btn:hover{background:var(--accent2)}
+.btn.ghost{background:var(--panel);border:1px solid var(--border);color:var(--text)}
+.btn.ghost:hover{border-color:var(--accent);background:var(--panel2)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+.gcard{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:.18s;display:flex;flex-direction:column}
+.gcard:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.cover{aspect-ratio:16/10;background:linear-gradient(160deg,#1f2937,#0f0f14);position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.gcard .info{padding:10px 14px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.gcard .info b{font-size:.95rem;line-height:1.25}
+.gcard .info small{color:var(--muted);font-size:.78rem}
+.badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.75);color:var(--gold);font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:14px}
+.badge.soon{color:var(--blue)}
+.pill{display:inline-block;background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-size:.72rem;padding:3px 9px;border-radius:14px}
+.pill.free{color:var(--green);border-color:rgba(52,211,153,.35)}
+.pill.soon{color:var(--blue);border-color:rgba(96,165,250,.35)}
+.pill.power{color:var(--gold);border-color:rgba(251,191,36,.35);font-weight:700}
+.empty{text-align:center;color:var(--muted);padding:70px 20px;border:1px dashed var(--border);border-radius:14px}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th{color:var(--muted);text-align:left;font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border)}
+tr:hover td{background:var(--panel)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:26px}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px}
+.stat b{font-size:1.7rem;display:block;background:linear-gradient(90deg,var(--accent),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat span{color:var(--muted);font-size:.8rem}
+.barchart{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:20px}
+.barchart h3{font-size:.95rem;margin-bottom:14px;color:var(--muted)}
+.brow{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.brow .lbl{width:140px;font-size:.84rem;color:var(--text);text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brow .track{flex:1;background:var(--panel2);border-radius:12px;height:18px;overflow:hidden}
+.brow .fill{background:linear-gradient(90deg,var(--accent),var(--accent2));height:100%;border-radius:12px}
+.brow .val{width:70px;font-size:.78rem;color:var(--muted)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:flex-start;justify-content:center;padding:30px 16px;overflow-y:auto;z-index:50}
+.modal-bg.open{display:flex}
+.modal{background:var(--panel2);border:1px solid var(--border);border-radius:16px;width:100%;max-width:820px;overflow:hidden}
+.detail-head{display:flex;flex-wrap:wrap}
+.detail-cover{width:300px;flex-shrink:0;background:#000}
+.detail-cover img{width:100%;height:100%;object-fit:cover;display:block;aspect-ratio:16/10}
+.detail-body{flex:1;padding:22px;min-width:260px}
+.detail-body h2{font-size:1.4rem;margin-bottom:4px}
+.sub{color:var(--muted);font-size:.85rem;margin-bottom:14px}
+.dfields{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.dfield{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:9px 12px}
+.dfield small{display:block;color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.5px}
+.dfield span{font-size:.92rem}
+.desc{color:#c9c9d4;font-size:.9rem;line-height:1.55;white-space:pre-wrap;margin:12px 0}
+.dtabs{display:flex;gap:4px;border-top:1px solid var(--border);padding:10px 16px 0;flex-wrap:wrap}
+.dtabs button{background:none;border:none;color:var(--muted);padding:8px 12px;cursor:pointer;font-size:.86rem;border-bottom:2px solid transparent}
+.dtabs button.active{color:var(--text);border-color:var(--accent)}
+.dpanel{padding:6px 22px 22px;min-height:80px}
+.note-item{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.note-item b{font-size:.92rem}
+.note-item p{color:var(--muted);font-size:.85rem;margin-top:5px;white-space:pre-wrap}
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:.76rem;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.form-row input,.form-row select,.form-row textarea{width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:.9rem;font-family:inherit;outline:none}
+.form-row input:focus,.form-row textarea:focus{border-color:var(--accent)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;padding:12px 20px;border-radius:10px;font-weight:600;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none;z-index:99}
+.toast.show{opacity:1;transform:none}
+@media(max-width:640px){
+  header,main{padding-left:14px;padding-right:14px}
+  .detail-head{flex-direction:column}
+  .detail-cover{width:100%}
+  .form-row.w50{width:100%}
+  .brow .lbl{width:90px;font-size:.78rem}
+  .dfields{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><em>GARAGE</em> NOIR</div>
+  <input id="globalSearch" type="search" placeholder="Rechercher une voiture, une marque…" oninput="render()">
+  <nav>
+    <button data-t="accueil" class="active" onclick="go('accueil')">🚗 Véhicules</button>
+    <button data-t="sorties" onclick="go('sorties')">🆕 Sorties</button>
+    <button data-t="prix" onclick="go('prix')">💰 Prix</button>
+    <button data-t="classement" onclick="go('classement')">🏆 Classement</button>
+    <button data-t="stats" onclick="go('stats')">📊 Statistiques</button>
+    <button data-t="gestion" onclick="go('gestion')">🗂️ Gestion</button>
+  </nav>
+</header>
+
+<main id="main"></main>
+
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script>
+const SEED=(typeof GARS_DB!=='undefined')?GARS_DB:[];
+
+const SKEY='garage-noir-v1';
+let db=JSON.parse(localStorage.getItem(SKEY)||'null');
+if(!db){
+  db={cars:SEED.map((c,i)=>({...c,id:c.id||'c'+i})),entries:[]};
+  persist();
+}
+let vue='accueil', gestionTab='astuces', detailId=null, detailTab='infos', editingEntry=null, editingCar=null;
+
+function persist(){ localStorage.setItem(SKEY,JSON.stringify(db)); }
+function esc(s){const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
+function car(id){ return db.cars.find(c=>c.id===id); }
+function nom(c){ return ((c.marque||'')+' '+(c.modele||'')).trim()||c.titre||''; }
+function eur(n){ return (n!==''&&n!=null&&Number(n)>0) ? Number(n).toLocaleString('fr-FR')+' €' : '—'; }
+function prixTxt(c){ return c.prixTxt || eur(c.prix); }
+function full(c){ return nom(c)+' '+(c.moteur||'')+' '+(c.type||'')+' '+(c.pays||''); }
+
+function wrap(t,maxlen){ if(!t) return ['']; const words=t.split(' '); const lines=[]; let cur='';
+  for(const w of words){ if((cur+' '+w).trim().length<=maxlen){ cur=(cur+' '+w).trim(); } else { lines.push(cur); cur=w; } if(lines.length>=4){ break; } }
+  if(lines.length<4&&cur) lines.push(cur); return lines; }
+
+function svgCover(c){
+  const g=nom(c), sub=((c.type||c.marque||'')+(c.puissance?' · '+c.puissance+' ch':''));
+  const hue=(g.charCodeAt(0)||70)%360, hue2=(hue+55)%360;
+  const lines=wrap(g,14);
+  let tspans='';
+  lines.forEach((l,i)=>{ tspans+='<tspan x="320" dy="'+(i===0?0:44)+'">'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</tspan>'; });
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400">'
+    +'<defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1">'
+    +'<stop offset="0" stop-color="hsl('+hue+',40%,22%)"/><stop offset="1" stop-color="hsl('+hue2+',55%,9%)"/></linearGradient></defs>'
+    +'<rect width="640" height="400" fill="url(#gg)"/>'
+    +'<rect x="40" y="330" width="560" height="2" fill="rgba(255,255,255,.12)"/>'
+    +'<text x="60" y="360" font-family="Segoe UI,Arial,sans-serif" font-size="17" fill="rgba(255,255,255,.35)">'+sub+'</text>'
+    +'<text x="320" y="170" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" '
+    +'font-size="46" font-weight="800" fill="rgba(255,255,255,.9)">'+tspans+'</text></svg>';
+  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+}
+
+function coverHTML(c){
+  const img=c.image?c.image:svgCover(c);
+  const badge=c.statut==='À venir'?'<span class="badge soon">À venir</span>':(c.note?`<span class="badge">★ ${String(c.note).replace('.',',')}</span>`:'');
+  return `<div class="cover"><img src="${esc(img)}" alt="" loading="lazy" onerror="this.style.display='none'">${badge}</div>`;
+}
+
+function go(t){ vue=t; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t)); render(); }
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); }
+
+function render(){
+  const q=document.getElementById('globalSearch').value.toLowerCase();
+  const M=document.getElementById('main');
+
+  if(vue==='accueil'){
+    const tip=document.getElementById('ft')?.value||'';
+    const types=[...new Set(db.cars.map(c=>c.type).filter(Boolean))].sort();
+    const cars=db.cars.filter(c=>full(c).toLowerCase().includes(q)&&(!tip||c.type===tip));
+    M.innerHTML=`<h2 class="section">🚗 Toutes les voitures <span class="pill">${cars.length}</span></h2>
+      <div class="filters">
+        <select id="ft" onchange="render()"><option value="">Tous les types</option>${types.map(x=>`<option ${x===tip?'selected':''}>${esc(x)}</option>`).join('')}</select>
+        <button class="btn" onclick="openCarForm()">+ Ajouter une voiture</button>
+        <button class="btn ghost" onclick="exportData()">⬇ Export</button>
+        <button class="btn ghost" onclick="document.getElementById('imp').click()">⬆ Import</button>
+        <input type="file" id="imp" accept=".json" style="display:none" onchange="importData(this)">
+      </div>
+      <div class="grid">${cars.map(c=>`
+        <div class="gcard" onclick="openDetail('${c.id}')">
+          ${coverHTML(c)}
+          <div class="info"><b>${esc(nom(c))}</b>
+          <small>${esc(c.moteur||'')}</small>
+          <div><span class="pill power">${c.puissance?c.puissance+' ch':'—'}</span> <span class="pill">${esc(String(c.annee||''))}</span> <span class="pill">${prixTxt(c)}</span></div>
+          </div>
+        </div>`).join('')}</div>`;
+    return;
+  }
+
+  if(vue==='sorties'){
+    const all=[...db.cars].sort((a,b)=>(Number(b.annee)||0)-(Number(a.annee)||0));
+    const rec=all.filter(c=>Number(c.annee)>=2024||c.statut==='À venir'), anc=all.filter(c=>!(Number(c.annee)>=2024||c.statut==='À venir'));
+    const row=c=>`<tr onclick="openDetail('${c.id}')" style="cursor:pointer">
+      <td><b>${esc(nom(c))}</b><br><small style="color:var(--muted)">${esc(c.moteur||'')}</small></td>
+      <td>${esc(String(c.annee||''))}</td><td>${esc(c.puissance?c.puissance+' ch':'—')}</td><td>${prixTxt(c)}</td>
+      <td>${c.statut==='À venir'?'<span class="pill soon">À venir</span>':'<span class="pill free">Disponible</span>'}</td></tr>`;
+    M.innerHTML=`<h2 class="section">🆕 Récentes &amp; à venir</h2>
+      ${rec.length?`<table><tr><th>Modèle</th><th>Année</th><th>Puissance</th><th>Prix</th><th>Dispo</th></tr>${rec.map(row).join('')}</table>`:'<div class="empty">Aucune nouveauté répertoriée.</div>'}
+      <h2 class="section" style="margin-top:34px">🕰️ Les autres</h2>
+      <table><tr><th>Modèle</th><th>Année</th><th>Puissance</th><th>Prix</th><th>Dispo</th></tr>${anc.map(row).join('')}</table>`;
+    return;
+  }
+
+  if(vue==='prix'){
+    const cars=[...db.cars].sort((a,b)=>((Number(a.prix)>0?Number(a.prix):Number.POSITIVE_INFINITY)-(Number(b.prix)>0?Number(b.prix):Number.POSITIVE_INFINITY)));
+    const pay=db.cars.filter(c=>Number(c.prix)>0&&!c.prixTxt);
+    const moyen=pay.length?Math.round(pay.reduce((s,c)=>s+Number(c.prix),0)/pay.length):0;
+    M.innerHTML=`<h2 class="section">💰 Prix <span class="pill">moyen (neuf) : ${moyen?moyen.toLocaleString('fr-FR')+' €':'—'}</span></h2>
+      <table><tr><th>Modèle</th><th>Prix</th><th>Type</th><th>Année</th></tr>
+      ${cars.map(c=>`<tr onclick="openDetail('${c.id}')" style="cursor:pointer">
+        <td><b>${esc(nom(c))}</b></td><td><span class="pill">${prixTxt(c)}</span></td>
+        <td><small>${esc(c.type||'')}</small></td><td><small>${esc(String(c.annee||''))}</small></td></tr>`).join('')}</table>`;
+    return;
+  }
+
+  if(vue==='classement'){
+    const crit=document.getElementById('fk')?.value||'vmax';
+    const byV=[...db.cars].filter(c=>c.vmax>0).sort((a,b)=>b.vmax-a.vmax);
+    const byP=[...db.cars].filter(c=>c.puissance>0).sort((a,b)=>b.puissance-a.puissance);
+    const med=['🥇','🥈','🥉'];
+    const row=(c,i,val,unit)=>`<tr onclick="openDetail('${c.id}')" style="cursor:pointer">
+      <td><b>${med[i]||'#'+(i+1)}</b></td><td><b>${esc(nom(c))}</b> <small style="color:var(--muted)">· ${esc(String(c.annee||''))}</small></td>
+      <td><b style="color:var(--gold)">${val} ${unit}</b></td></tr>`;
+    M.innerHTML=`<h2 class="section">🏆 Classement</h2>
+      <div class="filters"><select id="fk" onchange="render()">
+        <option value="vmax" ${crit==='vmax'?'selected':''}>Vitesse maximale</option>
+        <option value="puissance" ${crit==='puissance'?'selected':''}>Puissance</option></select></div>
+      ${crit==='vmax'
+        ?`<table><tr><th>Rang</th><th>Modèle</th><th>V-max</th></tr>${byV.map((c,i)=>row(c,i,c.vmax,'km/h')).join('')}</table>`
+        :`<table><tr><th>Rang</th><th>Modèle</th><th>Puissance</th></tr>${byP.map((c,i)=>row(c,i,c.puissance,'ch')).join('')}</table>`}`;
+    return;
+  }
+
+  if(vue==='stats'){
+    const pay=db.cars.filter(c=>Number(c.prix)>0&&!c.prixTxt);
+    const moyPrix=pay.length?Math.round(pay.reduce((s,c)=>s+Number(c.prix),0)/pay.length):0;
+    const pow=db.cars.filter(c=>Number(c.puissance)>0);
+    const moyCh=pow.length?Math.round(pow.reduce((s,c)=>s+Number(c.puissance),0)/pow.length):0;
+    const vm=db.cars.filter(c=>Number(c.vmax)>0);
+    const moyV=vm.length?Math.round(vm.reduce((s,c)=>s+Number(c.vmax),0)/vm.length):0;
+    const cnt=arr=>{const m={};arr.forEach(x=>m[x]=(m[x]||0)+1);return Object.entries(m).sort((a,b)=>b[1]-a[1]);};
+    const bars=(title,pairs)=>`<div class="barchart"><h3>${title}</h3>${pairs.length?pairs.map(([k,v])=>{
+      const max=pairs[0][1]||1;return `<div class="brow"><span class="lbl">${esc(k)}</span><div class="track"><div class="fill" style="width:${(v/max*100).toFixed(0)}%"></div></div><span class="val">${v}</span></div>`;}).join(''):'<div class="empty">—</div>'}</div>`;
+    M.innerHTML=`<h2 class="section">📊 Statistiques</h2>
+      <div class="stats-grid">
+        <div class="stat"><b>${db.cars.length}</b><span>Voitures dans la base</span></div>
+        <div class="stat"><b>${moyCh} ch</b><span>Puissance moyenne</span></div>
+        <div class="stat"><b>${moyV} km/h</b><span>V-max moyenne</span></div>
+        <div class="stat"><b>${moyPrix?moyPrix.toLocaleString('fr-FR')+' €':'—'}</b><span>Prix moyen</span></div>
+        <div class="stat"><b>${db.entries.length}</b><span>Notes (tuning, bugs…)</span></div>
+      </div>
+      ${bars('Répartition par marque',cnt(db.cars.map(c=>c.marque).filter(Boolean)))}
+      ${bars('Répartition par type',cnt(db.cars.map(c=>c.type).filter(Boolean)))}
+      ${bars('Répartition par pays',cnt(db.cars.map(c=>c.pays).filter(Boolean)))}
+      ${bars('Répartition par décennie',cnt(db.cars.map(c=>c.annee?(Math.floor(Number(c.annee)/10)*10+'s'):'inconnue')))}`;
+    return;
+  }
+
+  if(vue==='gestion'){
+    const TABS=[['astuces','💡 Astuces'],['bugs','🐞 Bugs'],['tuning','🛠️ Tuning'],['projets','📋 Projets']];
+    M.innerHTML=`<h2 class="section">🗂️ Ma gestion</h2>
+      <div class="filters">${TABS.map(([id,l])=>`<button class="btn ${gestionTab===id?'':'ghost'}" onclick="gestionTab='${id}';render()">${l}</button>`).join('')}
+      <span style="flex:1"></span><button class="btn" onclick="openEntryForm()">+ Ajouter</button></div>
+      <div id="gList"></div>`;
+    const L=document.getElementById('gList');
+    const items=db.entries.filter(e=>e.type===gestionTab&&Object.values(e).join(' ').toLowerCase().includes(q));
+    if(!items.length){L.innerHTML='<div class="empty">Rien ici pour le moment.</div>';return;}
+    L.innerHTML=items.map(e=>{
+      const tags=[e.gravite?`<span class="pill soon">${esc(e.gravite)}</span>`:'',
+                  e.statutEntry?`<span class="pill free">${esc(e.statutEntry)}</span>`:'',
+                  e.carId?`<span class="pill">🚗 ${esc(nom(car(e.carId)||{}))}</span>`:''].join(' ');
+      return `<div class="note-item"><b>${esc(e.titre)}</b> ${tags}${e.contenu?`<p>${esc(e.contenu)}</p>`:''}
+        <div style="margin-top:8px"><button class="btn ghost" style="padding:5px 12px;font-size:.8rem" onclick="openEntryForm('${e.id}')">✏️ Modifier</button>
+        <button class="btn ghost" style="padding:5px 12px;font-size:.8rem" onclick="delEntry('${e.id}')">🗑️</button></div></div>`;
+    }).join('');
+    return;
+  }
+}
+
+function openDetail(id){
+  detailId=id; detailTab='infos'; renderDetail(); render();
+}
+function renderDetail(){
+  const c=car(detailId); if(!c) return;
+  const tabs=[['infos','Fiche'],['notes','Notes liées']];
+  const related=db.entries.filter(e=>e.carId===detailId);
+  let panel='';
+  if(detailTab==='infos'){
+    panel=`<div class="dfields">
+      <div class="dfield"><small>Marque</small><span>${esc(c.marque)}</span></div>
+      <div class="dfield"><small>Pays</small><span>${esc(c.pays)}</span></div>
+      <div class="dfield"><small>Année</small><span>${esc(String(c.annee||''))}</span></div>
+      <div class="dfield"><small>Moteur</small><span>${esc(c.moteur)}</span></div>
+      <div class="dfield"><small>Puissance</small><span>${c.puissance?c.puissance+' ch':'—'}</span></div>
+      <div class="dfield"><small>0–100 km/h</small><span>${c.accel?c.accel+' s':'—'}</span></div>
+      <div class="dfield"><small>Vitesse max</small><span>${c.vmax?c.vmax+' km/h':'—'}</span></div>
+      <div class="dfield"><small>Boîte</small><span>${esc(c.boite)}</span></div>
+      <div class="dfield"><small>Type</small><span>${esc(c.type)}</span></div>
+      <div class="dfield"><small>Prix</small><span>${prixTxt(c)}</span></div>
+      <div class="dfield"><small>Statut</small><span>${esc(c.statut)}</span></div>
+      <div class="dfield"><small>Note</small><span>${c.note?String(c.note).replace('.',',')+'/10':'—'}</span></div>
+    </div>
+    <div><small style="color:var(--muted);display:block;margin-bottom:6px">Présentation</small><div class="desc" style="margin:0">${esc(c.description)||'—'}</div></div>`;
+  }
+  if(detailTab==='notes'){
+    panel=related.length?related.map(e=>`<div class="note-item"><b>${esc(e.titre)}</b> <span class="pill">» ${esc(e.type)}</span>${e.contenu?`<p>${esc(e.contenu)}</p>`:''}</div>`).join('')
+      :'<div class="empty">Aucune note liée à cette voiture.</div>';
+  }
+  document.getElementById('modal').innerHTML=`
+    <div class="detail-head">
+      <div class="detail-cover"><img src="${esc(c.image||svgCover(c))}" onerror="this.style.display='none'"></div>
+      <div class="detail-body">
+        <h2>${esc(nom(c))}</h2>
+        <div class="sub">${esc(c.type||'')} · ${esc(c.pays||'')} · ${c.puissance?c.puissance+' ch':'—'} · ${prixTxt(c)}</div>
+        <div class="modal-actions" style="justify-content:flex-start">
+          <button class="btn" onclick="openCarForm('${c.id}')">✏️ Modifier la fiche</button>
+          <button class="btn ghost" onclick="delCar('${c.id}')">🗑️ Supprimer</button>
+          <button class="btn ghost" onclick="closeModal()">Fermer</button>
+        </div>
+      </div>
+    </div>
+    <div class="dtabs">${tabs.map(([id2,l])=>`<button class="${detailTab===id2?'active':''}" onclick="detailTab='${id2}';renderDetail()">${l}</button>`).join('')}</div>
+    <div class="dpanel">${panel}</div>`;
+  document.getElementById('modalBg').classList.add('open');
+}
+function closeModal(){ document.getElementById('modalBg').classList.remove('open'); }
+
+function openCarForm(id){
+  editingCar=id||null;
+  const c=id?car(id):{statut:'En vente',annee:new Date().getFullYear()};
+  document.getElementById('modal').innerHTML=`
+    <div class="detail-body" style="min-height:0">
+      <h2>${id?'Modifier — '+esc(nom(c)):'Ajouter une voiture'}</h2>
+      <form onsubmit="saveCar(event)">
+        <div class="form-row"><label>Modèle complet *</label><input name="titre" required value="${esc(nom(c))}"></div>
+        <div class="form-row"><label>Marque</label><input name="marque" value="${esc(c.marque||'')}"></div>
+        <div class="form-row"><label>Modèle</label><input name="modele" value="${esc(c.modele||'')}" placeholder="911 GT3 RS…"></div>
+        <div class="form-row"><label>Année</label><input name="annee" type="number" value="${esc(c.annee||'')}"></div>
+        <div class="form-row"><label>Pays</label><input name="pays" value="${esc(c.pays||'')}" placeholder="Allemagne, Italie…"></div>
+        <div class="form-row"><label>Type</label><input name="type" value="${esc(c.type||'')}" placeholder="Sportive, SUV, Berline…"></div>
+        <div class="form-row"><label>Moteur</label><input name="moteur" value="${esc(c.moteur||'')}" placeholder="V8 4.0 biturbo…"></div>
+        <div class="form-row"><label>Puissance (ch)</label><input name="puissance" type="number" value="${esc(c.puissance||'')}"></div>
+        <div class="form-row"><label>0–100 km/h (s)</label><input name="accel" type="number" step="0.1" value="${esc(c.accel||'')}"></div>
+        <div class="form-row"><label>Vitesse max (km/h)</label><input name="vmax" type="number" value="${esc(c.vmax||'')}"></div>
+        <div class="form-row"><label>Boîte</label><input name="boite" value="${esc(c.boite||'')}" placeholder="Manuelle 6, DSG 7…"></div>
+        <div class="form-row"><label>Prix (€)</label><input name="prix" type="number" value="${esc(c.prix||'')}"></div>
+        <div class="form-row"><label>Prix (texte libre)</label><input name="prixTxt" value="${esc(c.prixTxt||'')}" placeholder="Sur cote, prix collection…"></div>
+        <div class="form-row"><label>Statut</label><select name="statut"><option ${c.statut==='En vente'?'selected':''}>En vente</option><option ${c.statut==='À venir'?'selected':''}>À venir</option><option ${c.statut==='Collection'?'selected':''}>Collection</option></select></div>
+        <div class="form-row"><label>Note /10</label><input name="note" type="number" step="0.1" min="0" max="10" value="${esc(c.note||'')}"></div>
+        <div class="form-row"><label>URL de la photo (optionnel)</label><input name="image" value="${esc(c.image&&c.image.startsWith('http')?c.image:'')}" placeholder="https://…"></div>
+        <div class="form-row"><label>Description</label><textarea name="description" style="min-height:100px">${esc(c.description||'')}</textarea></div>
+        <div class="modal-actions"><button type="button" class="btn ghost" onclick="closeModal()">Annuler</button><button class="btn">💾 Enregistrer</button></div>
+      </form>
+    </div>`;
+  document.getElementById('modalBg').classList.add('open');
+}
+function saveCar(e){
+  e.preventDefault();
+  const fd=new FormData(e.target), obj={};
+  ['titre','marque','modele','annee','pays','type','moteur','puissance','accel','vmax','boite','prix','prixTxt','statut','note','image','description'].forEach(k=>obj[k]=fd.get(k)||'');
+  ['annee','puissance','accel','vmax','prix','note'].forEach(k=>obj[k]=Number(obj[k])||0);
+  if(obj.titre&&!obj.marque) obj.marque=obj.titre.split(' ')[0];
+  if(obj.titre&&!obj.modele) obj.modele=obj.titre.replace(obj.marque,'').trim()||obj.titre;
+  if(editingCar){ if(!(obj.image&&obj.image.startsWith('http'))) obj.image=(car(editingCar).image||''); Object.assign(car(editingCar),obj); toast('Fiche modifiée ✅'); }
+  else{ obj.id='c'+Date.now(); db.cars.push(obj); toast('Voiture ajoutée 🚗'); }
+  persist(); closeModal(); render();
+}
+function delCar(id){
+  if(!confirm('Supprimer cette voiture et ses notes ?')) return;
+  db.cars=db.cars.filter(c=>c.id!==id);
+  db.entries=db.entries.filter(e=>e.carId!==id);
+  persist(); closeModal(); toast('Supprimée 🗑️'); render();
+}
+
+function openEntryForm(id){
+  editingEntry=id||null;
+  const e=id?db.entries.find(x=>x.id===id):{type:gestionTab};
+  const isB='bugs'===gestionTab, isT='tuning'===gestionTab||'projets'===gestionTab;
+  document.getElementById('modal').innerHTML=`
+    <div class="detail-body" style="min-height:0">
+      <h2>${id?'Modifier':'Ajouter'} — ${{astuces:'💡 Astuce',bugs:'🐞 Bug',tuning:'🛠️ Tuning',projets:'📋 Projet'}[e.type]}</h2>
+      <form onsubmit="saveEntry(event)">
+        <div class="form-row"><label>Titre *</label><input name="titre" required value="${esc(e.titre)}"></div>
+        <div class="form-row"><label>Voiture liée</label><select name="carId"><option value="">—</option>${db.cars.map(c=>`<option value="${c.id}" ${e.carId===c.id?'selected':''}>${esc(nom(c))}</option>`).join('')}</select></div>
+        ${isB?`<div class="form-row"><label>Gravité</label><select name="gravite">${['Mineure','Moyenne','Grave'].map(o=>`<option ${o===e.gravite?'selected':''}>${o}</option>`).join('')}</select></div>
+              <div class="form-row"><label>Statut</label><select name="statutEntry">${['Ouvert','En cours','Résolu','Contourné'].map(o=>`<option ${o===e.statutEntry?'selected':''}>${o}</option>`).join('')}</select></div>`:''}
+        ${isT?`<div class="form-row"><label>Budget estimé (€)</label><input name="budget" type="number" value="${esc(e.budget||'')}"></div>`:''}
+        <div class="form-row"><label>Contenu</label><textarea name="contenu" style="min-height:110px">${esc(e.contenu||'')}</textarea></div>
+        <div class="modal-actions"><button type="button" class="btn ghost" onclick="closeModal()">Annuler</button><button class="btn">💾 Enregistrer</button></div>
+      </form>
+    </div>`;
+  document.getElementById('modalBg').classList.add('open');
+}
+function saveEntry(ev){
+  ev.preventDefault();
+  const fd=new FormData(ev.target), obj={type:gestionTab};
+  ['titre','carId','gravite','statutEntry','budget','contenu'].forEach(k=>{const v=fd.get(k);if(v!=null)obj[k]=v;});
+  if(editingEntry) Object.assign(db.entries.find(x=>x.id===editingEntry),obj);
+  else{ obj.id='e'+Date.now(); db.entries.push(obj); }
+  persist(); closeModal(); toast('Enregistré ✅'); render();
+}
+function delEntry(id){ if(!confirm('Supprimer ?'))return; db.entries=db.entries.filter(e=>e.id!==id); persist(); toast('Supprimé 🗑️'); render(); }
+
+function exportData(){
+  const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='garage-noir.json'; a.click();
+}
+function importData(inp){
+  const f=inp.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{ try{
+    const d=JSON.parse(r.result);
+    if(Array.isArray(d.cars)) db.cars=d.cars;
+    if(Array.isArray(d.entries)) db.entries=d.entries;
+    persist(); render(); toast('Import réussi ✅');
+  }catch{ toast('Fichier invalide ❌'); } };
+  r.readAsText(f);
+}
+
+render();
+</script>
+</body>
+</html>
