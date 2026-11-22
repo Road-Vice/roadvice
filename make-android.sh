@@ -6,6 +6,7 @@ cd "$(dirname "$0")"
 
 mkdir -p www
 cp index.html style.css *.js www/
+cp -R vendor www/
 
 echo "==> Installation des outils Capacitor..."
 npm install

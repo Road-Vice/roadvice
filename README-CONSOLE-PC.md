@@ -139,17 +139,9 @@ attend sur mobile/PC indépendant.
 
 ## 🔌 Version hors-ligne (sans Internet)
 
-Le jeu appelle three.js par CDN (unpkg). Pour un APK/PC sans Internet :
-
-```bash
-npm install
-# télécharger three.js en local :
-mkdir -p vendor
-curl -o vendor/three.module.js https://unpkg.com/three@0.160.0/build/three.module.js
-```
-
-puis à modifier dans `index.html` l'entrée `"three"` de la balise
-`<script type="importmap">` pour pointer vers `./vendor/three.module.js`.
+Le moteur 3D (three.js) est désormais **inclus dans le dossier `vendor/`** : le jeu
+fonctionne **sans Internet** et se lance même si un bloqueur de pub bloque les
+serveurs de bibliothèque. Aucune cED à faire !
 
 ---
 
