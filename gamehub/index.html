@@ -127,7 +127,7 @@ const STEAM=a=>`https://cdn.cloudflare.steamstatic.com/steam/apps/${a}/library_6
 
 const SEED=(typeof GAMES_DB!=='undefined')?GAMES_DB:[];
 
-const SKEY='noir-games-v1';
+const SKEY='noir-games-v2';
 let db=JSON.parse(localStorage.getItem(SKEY)||'null');
 if(!db){
   db={games:SEED.map((g,i)=>({...g,id:g.id||'g'+i})),
