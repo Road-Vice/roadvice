@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Noir — Base de jeux</title>
+<style>
+:root{
+  --bg:#08080a; --panel:#121216; --panel2:#1a1a20; --border:#26262e;
+  --text:#ececf1; --muted:#8f8f9e; --accent:#e11d48; --accent2:#f43f5e;
+  --gold:#fbbf24; --green:#34d399; --blue:#60a5fa; --red:#f87171;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:var(--accent2)}
+header{position:sticky;top:0;z-index:20;background:rgba(8,8,10,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:14px 26px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+header .logo{font-size:1.35rem;font-weight:800;letter-spacing:.5px}
+header .logo em{font-style:normal;background:linear-gradient(90deg,var(--accent),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+#globalSearch{flex:1;min-width:220px;max-width:480px;background:var(--panel);border:1px solid var(--border);color:var(--text);padding:10px 16px;border-radius:24px;font-size:.95rem;outline:none}
+#globalSearch:focus{border-color:var(--accent)}
+nav{display:flex;gap:4px;overflow-x:auto}
+nav button{background:none;border:none;color:var(--muted);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:.92rem;white-space:nowrap;transition:.15s}
+nav button:hover{color:var(--text)}
+nav button.active{background:var(--panel2);color:var(--text);font-weight:600}
+main{max-width:1200px;margin:0 auto;padding:24px 26px 80px}
+h2.section{font-size:1.25rem;margin:8px 0 16px;display:flex;align-items:center;gap:10px}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.filters select{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:.9rem}
+.btn{background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;font-size:.93rem;font-weight:600;transition:.15s}
+.btn:hover{background:var(--accent2)}
+.btn.ghost{background:var(--panel);border:1px solid var(--border);color:var(--text)}
+.btn.ghost:hover{border-color:var(--accent);background:var(--panel2)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:18px}
+.gcard{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:.18s;display:flex;flex-direction:column}
+.gcard:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.cover{aspect-ratio:3/4;background:linear-gradient(160deg,#1f2937,#0f0f14);position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.cover .placeholder{font-size:2.4rem;font-weight:800;color:rgba(255,255,255,.25);letter-spacing:2px;text-align:center;padding:10px}
+.gcard .info{padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.gcard .info b{font-size:.92rem;line-height:1.25}
+.gcard .info small{color:var(--muted);font-size:.76rem}
+.badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.75);color:var(--gold);font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:14px}
+.badge.soon{color:var(--blue)}
+.pill{display:inline-block;background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-size:.72rem;padding:3px 9px;border-radius:14px}
+.pill.free{color:var(--green);border-color:rgba(52,211,153,.35)}
+.pill.soon{color:var(--blue);border-color:rgba(96,165,250,.35)}
+.empty{text-align:center;color:var(--muted);padding:70px 20px;border:1px dashed var(--border);border-radius:14px}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th{color:var(--muted);text-align:left;font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border)}
+tr:hover td{background:var(--panel)}
+.rank{font-weight:800;color:var(--gold);width:46px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:26px}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px}
+.stat b{font-size:1.7rem;display:block;background:linear-gradient(90deg,var(--accent),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat span{color:var(--muted);font-size:.8rem}
+.barchart{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:20px}
+.barchart h3{font-size:.95rem;margin-bottom:14px;color:var(--muted)}
+.brow{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.brow .lbl{width:140px;font-size:.84rem;color:var(--text);text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brow .track{flex:1;background:var(--panel2);border-radius:12px;height:18px;overflow:hidden}
+.brow .fill{background:linear-gradient(90deg,var(--accent),var(--accent2));height:100%;border-radius:12px}
+.brow .val{width:40px;font-size:.78rem;color:var(--muted)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:flex-start;justify-content:center;padding:30px 16px;overflow-y:auto;z-index:50}
+.modal-bg.open{display:flex}
+.modal{background:var(--panel2);border:1px solid var(--border);border-radius:16px;width:100%;max-width:820px;overflow:hidden}
+.detail-head{display:flex;gap:0;flex-wrap:wrap}
+.detail-cover{width:240px;flex-shrink:0;background:#000;min-height:300px}
+.detail-cover img{width:100%;height:100%;object-fit:cover;display:block}
+.detail-body{flex:1;padding:22px;min-width:260px}
+.detail-body h2{font-size:1.4rem;margin-bottom:4px}
+.sub{color:var(--muted);font-size:.85rem;margin-bottom:14px}
+.dfields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.dfield{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:9px 12px}
+.dfield small{display:block;color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.5px}
+.dfield span{font-size:.92rem}
+.desc{color:#c9c9d4;font-size:.9rem;line-height:1.55;white-space:pre-wrap;margin:12px 0}
+.dtabs{display:flex;gap:4px;border-top:1px solid var(--border);padding:10px 16px 0;flex-wrap:wrap}
+.dtabs button{background:none;border:none;color:var(--muted);padding:8px 12px;cursor:pointer;font-size:.86rem;border-bottom:2px solid transparent}
+.dtabs button.active{color:var(--text);border-color:var(--accent)}
+.dpanel{padding:6px 22px 22px;min-height:80px}
+.note-item{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.note-item b{font-size:.92rem}
+.note-item p{color:var(--muted);font-size:.85rem;margin-top:5px;white-space:pre-wrap}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:.76rem;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.form-row input,.form-row select,.form-row textarea{width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:.9rem;font-family:inherit;outline:none}
+.form-row input:focus,.form-row textarea:focus{border-color:var(--accent)}
+.w100{grid-column:1/-1}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;padding:12px 20px;border-radius:10px;font-weight:600;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none;z-index:99}
+.toast.show{opacity:1;transform:none}
+@media(max-width:640px){
+  header,main{padding-left:14px;padding-right:14px}
+  .detail-head{flex-direction:column}
+  .detail-cover{width:100%;min-height:0;aspect-ratio:3/2}
+  .form-grid,.dfields{grid-template-columns:1fr}
+  .brow .lbl{width:90px;font-size:.78rem}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><em>NOIR</em> jeux</div>
+  <input id="globalSearch" type="search" placeholder="Rechercher un jeu…" oninput="render()">
+  <nav>
+    <button data-t="accueil" class="active" onclick="go('accueil')">🎮 Jeux</button>
+    <button data-t="sorties" onclick="go('sorties')">📅 Sorties</button>
+    <button data-t="prix" onclick="go('prix')">💰 Prix</button>
+    <button data-t="classement" onclick="go('classement')">🏆 Classement</button>
+    <button data-t="stats" onclick="go('stats')">📊 Statistiques</button>
+    <button data-t="gestion" onclick="go('gestion')">🗂️ Gestion</button>
+  </nav>
+</header>
+
+<main id="main"></main>
+
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const STEAM=a=>`https://cdn.cloudflare.steamstatic.com/steam/apps/${a}/library_600x900_2x.jpg`;
+
+const SEED=[
+ {titre:"Cyberpunk 2077",dev:"CD Projekt Red",editeur:"CD Projekt",date:"2020-12-10",age:"PEGI 18",prix:29.99,plateformes:"PC, PS5, Xbox Series",genres:"RPG, Action",note:8.4,appid:1091500,statut:"Sorti",description:"Dans Night City, tu incarne V, un mercenaire traquant une implantation qui confère l'immortalité. Monde ouvert futuriste, choix moraux, extensions (Phantom Liberty)."},
+ {titre:"GTA V",dev:"Rockstar North",editeur:"Rockstar Games",date:"2015-04-14",age:"PEGI 18",prix:29.99,plateformes:"PC, PS5, Xbox Series",genres:"Action, Monde ouvert",note:9.0,appid:271590,statut:"Sorti",description:"Trois criminels à Los Santos : braquages, GTA Online heists, monde ouvert vibrant. Le mode Online reçoit toujours du contenu."},
+ {titre:"Red Dead Redemption 2",dev:"Rockstar Studios",editeur:"Rockstar Games",date:"2019-11-05",age:"PEGI 18",prix:59.99,plateformes:"PC, PS4, Xbox One",genres:"Action, Aventure",note:9.6,appid:1174180,statut:"Sorti",description:"Arthur Morgan et la bande de Dutch en fuite à la fin du far-west. Histoire poignante, monde ouvert ultra détaillé, Red Dead Online."},
+ {titre:"Elden Ring",dev:"FromSoftware",editeur:"Bandai Namco",date:"2022-02-25",age:"PEGI 16",prix:59.99,plateformes:"PC, PS5, Xbox Series",genres:"RPG, Souls",note:9.5,appid:1245620,statut:"Sorti",description:"Deviens Sans-tache et explore l'Entre-terre : monde ouvert sombre, boss colossaux, DLC Shadow of the Erdtree."},
+ {titre:"Baldur's Gate 3",dev:"Larian Studios",editeur:"Larian",date:"2023-08-03",age:"PEGI 18",prix:59.99,plateformes:"PC, PS5, Xbox Series",genres:"RPG",note:9.7,appid:1086940,statut:"Sorti",description:"RPG basé sur D&D 5e : ton équipe est infectée par un ver cérébral. Liberté totale, réactions en chaîne, co-op jusqu'à 4."},
+ {titre:"The Witcher 3",dev:"CD Projekt Red",editeur:"CD Projekt",date:"2015-05-19",age:"PEGI 18",prix:39.99,plateformes:"PC, PS5, Switch",genres:"RPG, Aventure",note:9.4,appid:292030,statut:"Sorti",description:"Geralt de Riv chasse les monstres et cherche Ciri. Quêtes narratives de référence, GOTY avec Blood & Wine."},
+ {titre:"Hollow Knight",dev:"Team Cherry",editeur:"Team Cherry",date:"2017-02-24",age:"PEGI 7",prix:14.99,plateformes:"PC, Switch, PS4",genres:"Metroidvania",note:9.3,appid:367520,statut:"Sorti",description:"Un petit scarabée explore Hallownest, royaume déchu souterrain. Plateforme exigeante, atmosphère mélancolique, Hollow Knight: Silksong en suite."},
+ {titre:"Hades",dev:"Supergiant Games",editeur:"Supergiant",date:"2020-09-17",age:"PEGI 12",prix:24.99,plateformes:"PC, Switch, PS5",genres:"Rogue-lite",note:9.0,appid:1145360,statut:"Sorti",description:"Zagreus, fils d'Hadès, tente de s'échapper des Enfers : chaque mort renforce ses pouvoirs. Combat nerveux, DV indie culte."},
+ {titre:"Stardew Valley",dev:"ConcernedApe",editeur:"ConcernedApe",date:"2016-02-26",age:"PEGI 7",prix:14.99,plateformes:"PC, Switch, Mobile",genres:"Farm, Vie tranquille",note:9.0,appid:413150,statut:"Sorti",description:"Tu hérites d'une ferme à Stardew : culture, pêche, mines, mariage. Update 1.6 ajoute des festivals, 1.7 prépare le mode multi."},
+ {titre:"Counter-Strike 2",dev:"Valve",editeur:"Valve",date:"2023-09-27",age:"PEGI 18",prix:0,plateformes:"PC",genres:"FPS, Compétitif",note:8.0,appid:730,statut:"Sorti",description:"Le FPS compétitif de référence rebâti sur Source 2 : 5v5, système de rangs, économie de skins. Gratuit."},
+ {titre:"Dota 2",dev:"Valve",editeur:"Valve",date:"2013-07-09",age:"PEGI 12",prix:0,plateformes:"PC",genres:"MOBA",note:8.0,appid:570,statut:"Sorti",description:"MOBA 5v5 : 126 héros, méta désormais sans limites, tournois au prize-pool record (The International). Gratuit."},
+ {titre:"Portal 2",dev:"Valve",editeur:"Valve",date:"2011-04-19",age:"PEGI 12",prix:9.99,plateformes:"PC",genres:"Puzzle",note:9.4,appid:620,statut:"Sorti",description:"Puzzle à portails avec GLaDOS et Wheatley. Co-op dédiée, atelier de niveaux, humour et vitesses légendaires."},
+ {titre:"Grand Theft Auto VI",dev:"Rockstar Games",editeur:"Rockstar Games",date:"2026-11-19",age:"PEGI 18",prix:79.99,plateformes:"PS5, Xbox Series",genres:"Action, Monde ouvert",note:0,appid:0,statut:"À venir",description:"Retour à Vice City avec Lucia et Jason : le premier duo féminin de la franchise. Sortie attendue le 19 novembre 2026."}
+];
+
+const SKEY='noir-games-v1';
+let db=JSON.parse(localStorage.getItem(SKEY)||'null');
+if(!db){
+  db={
+    games:SEED.map((g,i)=>({...g,id:'g'+i,image:g.appid?STEAM(g.appid):''})),
+    entries:[]
+  };
+  persist();
+}
+let vue='accueil', gestionTab='astuces', detailId=null, detailTab='infos', editingEntry=null, editingGame=null;
+
+function persist(){ localStorage.setItem(SKEY,JSON.stringify(db)); }
+function saveGameList(){ persist(); }
+function esc(s){const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
+function jeu(id){ return db.games.find(g=>g.id===id); }
+function gameTitle(id){ const g=jeu(id); return g?g.titre:'—'; }
+function eur(n){ return n===0||n==='0' ? 'Gratuit' : (n!==''&&n!=null ? Number(n).toFixed(2)+' €' : '—'); }
+function fdate(d){ if(!d) return '—'; const x=new Date(d); return isNaN(x)?d:x.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}); }
+function noteTxt(g){ return g.statut==='À venir'?'—':(g.note?g.note.toFixed(1)+'/10':'—'); }
+
+function go(t){ vue=t; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t)); render(); }
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); }
+
+function coverHTML(g,cls){
+  const ph=`<div class="placeholder">${esc(g.titre.split(' ').map(w=>w[0]).join('').slice(0,3).toUpperCase())}</div>`;
+  return `<div class="${cls||'cover'}">${g.image?`<img src="${esc(g.image)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;placeholder&quot;>${esc(g.titre.slice(0,8).toUpperCase())}</div>'">`:ph}${g.statut==='À venir'?'<span class="badge soon">À venir</span>':(g.note?`<span class="badge">★ ${g.note.toFixed(1)}</span>`:'')}</div>`;
+}
+
+function render(){
+  const q=document.getElementById('globalSearch').value.toLowerCase();
+  const M=document.getElementById('main');
+
+  if(vue==='accueil'){
+    const genre=document.getElementById('fg')?.value||'';
+    const genres=[...new Set(db.games.flatMap(g=>g.genres.split(',').map(s=>s.trim()).filter(Boolean)))].sort();
+    const games=db.games.filter(g=>(g.titre+' '+g.dev+' '+g.genres).toLowerCase().includes(q)&&(!genre||g.genres.includes(genre)));
+    M.innerHTML=`<h2 class="section">🎮 Tous les jeux <span class="pill">${games.length}</span></h2>
+      <div class="filters">
+        <select id="fg" onchange="render()"><option value="">Tous les genres</option>${genres.map(x=>`<option ${x===genre?'selected':''}>${esc(x)}</option>`).join('')}</select>
+        <button class="btn" onclick="openGameForm()">+ Ajouter un jeu</button>
+        <button class="btn ghost" onclick="exportData()">⬇ Export</button>
+        <button class="btn ghost" onclick="document.getElementById('imp').click()">⬆ Import</button>
+        <input type="file" id="imp" accept=".json" style="display:none" onchange="importData(this)">
+      </div>
+      <div class="grid">${games.map(g=>`
+        <div class="gcard" onclick="openDetail('${g.id}')">
+          ${coverHTML(g)}
+          <div class="info"><b>${esc(g.titre)}</b>
+          <small>${esc(g.dev)} · ${fdate(g.date)}</small>
+          <div><span class="pill ${g.prix===0?'free':''}">${eur(g.prix)}</span> <span class="pill">${esc(g.age)}</span></div>
+          </div>
+        </div>`).join('')}</div>`;
+    return;
+  }
+
+  if(vue==='sorties'){
+    const all=[...db.games].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+    const now=new Date().toISOString().slice(0,10);
+    const fut=all.filter(g=>g.date>=now), past=all.filter(g=>g.date<now);
+    const row=g=>`<tr onclick="openDetail('${g.id}')" style="cursor:pointer"><td style="width:56px">${coverHTML(g).replace('class="cover"','style="width:44px;border-radius:6px;overflow:hidden;aspect-ratio:3/4"')}</td>
+      <td><b>${esc(g.titre)}</b><br><small style="color:var(--muted)">${esc(g.dev)}</small></td>
+      <td>${fdate(g.date)}</td><td>${esc(g.age)}</td><td>${eur(g.prix)}</td>
+      <td>${g.statut==='À venir'?'<span class="pill soon">À venir</span>':'<span class="pill free">Sorti</span>'}</td></tr>`;
+    M.innerHTML=`<h2 class="section">📅 Sorties à venir</h2>
+      ${fut.length?`<table><tr><th></th><th>Jeu</th><th>Date</th><th>Âge</th><th>Prix</th><th>Statut</th></tr>${fut.map(row).join('')}</table>`:'<div class="empty">Aucune sortie à venir — ajoute un jeu avec statut « À venir ».</div>'}
+      <h2 class="section" style="margin-top:34px">✅ Déjà sorties</h2>
+      <table><tr><th></th><th>Jeu</th><th>Date</th><th>Âge</th><th>Prix</th><th>Statut</th></tr>${past.map(row).join('')}</table>`;
+    return;
+  }
+
+  if(vue==='prix'){
+    const games=[...db.games].sort((a,b)=>(a.prix||0)-(b.prix||0));
+    const moyen=(db.games.filter(g=>g.prix>0).reduce((s,g)=>s+Number(g.prix),0)/Math.max(1,db.games.filter(g=>g.prix>0).length)).toFixed(2);
+    M.innerHTML=`<h2 class="section">💰 Prix <span class="pill">moyen : ${moyen} €</span></h2>
+      <table><tr><th>Jeu</th><th>Prix</th><th>Plateformes</th><th>Éditeur</th></tr>
+      ${games.map(g=>`<tr onclick="openDetail('${g.id}')" style="cursor:pointer">
+        <td><b>${esc(g.titre)}</b></td>
+        <td><span class="pill ${g.prix===0?'free':''}">${eur(g.prix)}</span></td>
+        <td><small>${esc(g.plateformes)}</small></td><td><small>${esc(g.editeur)}</small></td></tr>`).join('')}</table>`;
+    return;
+  }
+
+  if(vue==='classement'){
+    const games=[...db.games].filter(g=>g.note>0).sort((a,b)=>b.note-a.note);
+    const med=['🥇','🥈','🥉'];
+    M.innerHTML=`<h2 class="section">🏆 Classement par note</h2>
+      ${games.length?`<table><tr><th>Rang</th><th>Jeu</th><th>Note</th><th>Genre</th></tr>
+      ${games.map((g,i)=>`<tr onclick="openDetail('${g.id}')" style="cursor:pointer">
+        <td><b>${med[i]||'#'+(i+1)}</b></td>
+        <td><b>${esc(g.titre)}</b> <small style="color:var(--muted)">· ${esc(g.dev)}</small></td>
+        <td><b style="color:var(--gold)">${g.note.toFixed(1)}/10</b></td>
+        <td><small>${esc(g.genres)}</small></td></tr>`).join('')}</table>`:'<div class="empty">Aucune note attribuée.</div>'}`;
+    return;
+  }
+
+  if(vue==='stats'){
+    const total=db.games.length, gratis=db.games.filter(g=>g.prix===0).length;
+    const notes=db.games.filter(g=>g.note>0);
+    const moyNotes=(notes.reduce((s,g)=>s+g.note,0)/Math.max(1,notes.length)).toFixed(1);
+    const pay=db.games.filter(g=>g.prix>0);
+    const moyPrix=(pay.reduce((s,g)=>s+Number(g.prix),0)/Math.max(1,pay.length)).toFixed(2);
+    const cnt=arr=>{const m={};arr.forEach(x=>m[x]=(m[x]||0)+1);return Object.entries(m).sort((a,b)=>b[1]-a[1]);};
+    const bars=(title,pairs)=>`<div class="barchart"><h3>${title}</h3>${pairs.length?pairs.map(([k,v])=>{
+      const max=pairs[0][1]||1;return `<div class="brow"><span class="lbl">${esc(k)}</span><div class="track"><div class="fill" style="width:${(v/max*100).toFixed(0)}%"></div></div><span class="val">${v}</span></div>`;}).join(''):'<div class="empty">—</div>'}</div>`;
+    M.innerHTML=`<h2 class="section">📊 Statistiques</h2>
+      <div class="stats-grid">
+        <div class="stat"><b>${total}</b><span>Jeux dans la base</span></div>
+        <div class="stat"><b>${gratis}</b><span>Jeux gratuits</span></div>
+        <div class="stat"><b>${moyPrix} €</b><span>Prix moyen</span></div>
+        <div class="stat"><b>${moyNotes}/10</b><span>Note moyenne</span></div>
+        <div class="stat"><b>${db.entries.length}</b><span>Notes (astuces, bugs…)</span></div>
+      </div>
+      ${bars('Répartition par genre',cnt(db.games.flatMap(g=>g.genres.split(',').map(s=>s.trim()).filter(Boolean))))}
+      ${bars('Répartition par plateforme',cnt(db.games.flatMap(g=>g.plateformes.split(',').map(s=>s.trim()).filter(Boolean))))}
+      ${bars('Répartition par développeur',cnt(db.games.map(g=>g.dev).filter(Boolean)))}
+      ${bars('Répartition PEGI',cnt(db.games.map(g=>g.age).filter(Boolean)))}`;
+    return;
+  }
+
+  if(vue==='gestion'){
+    const TABS=[['astuces','💡 Astuces'],['cheats','🔓 Cheats'],['bugs','🐞 Bugs'],['projets','🛠️ Projets']];
+    M.innerHTML=`<h2 class="section">🗂️ Ma gestion</h2>
+      <div class="filters">${TABS.map(([id,l])=>`<button class="btn ${gestionTab===id?'':'ghost'}" onclick="gestionTab='${id}';render()">${l}</button>`).join('')}
+      <span style="flex:1"></span><button class="btn" onclick="openEntryForm()">+ Ajouter</button></div>
+      <div id="gList"></div>`;
+    const L=document.getElementById('gList');
+    const q2=q;
+    let items=db.entries.filter(e=>e.type===gestionTab&&Object.values(e).join(' ').toLowerCase().includes(q2));
+    if(!items.length){L.innerHTML='<div class="empty">Rien ici pour le moment.</div>';return;}
+    L.innerHTML=items.map(e=>{
+      const tags=[e.severite?`<span class="pill ${e.severite==='Critique'?'soon':''}">${esc(e.severite)}</span>`:'',
+                  e.statutTag?`<span class="pill free">${esc(e.statutTag)}</span>`:'',
+                  e.gameId?`<span class="pill">🎮 ${esc(gameTitle(e.gameId))}</span>`:''].join(' ');
+      return `<div class="note-item"><b>${esc(e.titre)}</b> ${tags}${e.contenu?`<p>${esc(e.contenu)}</p>`:''}
+        <div style="margin-top:8px"><button class="btn ghost" style="padding:5px 12px;font-size:.8rem" onclick="openEntryForm('${e.id}')">✏️ Modifier</button>
+        <button class="btn ghost" style="padding:5px 12px;font-size:.8rem" onclick="delEntry('${e.id}')">🗑️</button></div></div>`;
+    }).join('');
+    return;
+  }
+}
+
+function openDetail(id){
+  detailId=id; detailTab='infos'; renderDetail(); render();
+}
+function renderDetail(){
+  const g=jeu(detailId); if(!g) return;
+  const tabs=[['infos','Infos'],['sorties','Sorties / agenda'],['prix','Prix'],['classement','Notes'],['gestion','Astuces & bugs']];
+  const related=db.entries.filter(e=>e.gameId===detailId);
+  let panel='';
+  if(detailTab==='infos'){
+    panel=`<div class="dfields">
+      <div class="dfield"><small>Développeur</small><span>${esc(g.dev)}</span></div>
+      <div class="dfield"><small>Éditeur</small><span>${esc(g.editeur)}</span></div>
+      <div class="dfield"><small>Date de sortie</small><span>${fdate(g.date)}</span></div>
+      <div class="dfield"><small>Âge (PEGI)</small><span>${esc(g.age)}</span></div>
+      <div class="dfield"><small>Prix</small><span>${eur(g.prix)}</span></div>
+      <div class="dfield"><small>Plateformes</small><span>${esc(g.plateformes)}</span></div>
+      <div class="dfield"><small>Genres</small><span>${esc(g.genres)}</span></div>
+      <div class="dfield"><small>Statut</small><span>${esc(g.statut)}</span></div>
+    </div>
+    <div class="dfield" style="margin-bottom:12px"><small>Note</small><span>${g.note?g.note.toFixed(1)+'/10':'—'}</span></div>
+    <div><small style="color:var(--muted);display:block;margin-bottom:6px">But du jeu / infos</small><div class="desc" style="margin:0">${esc(g.description)||'—'}</div></div>`;
+  }
+  if(detailTab==='sorties'){
+    panel=`<p class="desc">Sortie : <b>${fdate(g.date)}</b> — statut <b>${esc(g.statut)}</b>.</p>
+      ${g.date&&g.date>=new Date().toISOString().slice(0,10)&&g.statut==='À venir'?`<div class="dfield"><small>Compte à rebours</small><span>${Math.ceil((new Date(g.date)-Date.now())/86400000)} jours</span></div>`:''}`;
+  }
+  if(detailTab==='prix'){ panel=`<div class="dfield"><small>Prix de lancement / boutique</small><span style="font-size:1.2rem;font-weight:700">${eur(g.prix)}</span></div>`; }
+  if(detailTab==='classement'){ panel=`<div class="dfield"><small>Note</small><span>${g.note?g.note.toFixed(1)+'/10':'—'}</span></div><small style="color:var(--muted)">Modifiable via « Modifier la fiche ».</small>`; }
+  if(detailTab==='gestion'){
+    panel=related.length?related.map(e=>`<div class="note-item"><b>${esc(e.titre)}</b> <span class="pill">» ${esc(e.type)}</span>${e.contenu?`<p>${esc(e.contenu)}</p>`:''}</div>`).join('')
+      :'<div class="empty">Aucune note liée à ce jeu.</div>';
+  }
+  document.getElementById('modal').innerHTML=`
+    <div class="detail-head">
+      <div class="detail-cover">${g.image?`<img src="${esc(g.image)}" onerror="this.style.display='none'">`:`<div class="placeholder" style="font-size:3rem;color:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;height:100%">${esc(g.titre.slice(0,10))}</div>`}</div>
+      <div class="detail-body">
+        <h2>${esc(g.titre)}</h2>
+        <div class="sub">${esc(g.dev)} · ${esc(g.age)} · ${eur(g.prix)}</div>
+        <div class="modal-actions" style="justify-content:flex-start">
+          <button class="btn" onclick="openGameForm('${g.id}')">✏️ Modifier la fiche</button>
+          <button class="btn ghost" onclick="delGame('${g.id}')">🗑️ Supprimer</button>
+          <button class="btn ghost" onclick="closeModal()">Fermer</button>
+        </div>
+      </div>
+    </div>
+    <div class="dtabs">${tabs.map(([id2,l])=>`<button class="${detailTab===id2?'active':''}" onclick="detailTab='${id2}';renderDetail()">${l}</button>`).join('')}</div>
+    <div class="dpanel">${panel}</div>`;
+  document.getElementById('modalBg').classList.add('open');
+}
+function closeModal(){ document.getElementById('modalBg').classList.remove('open'); }
+
+function openGameForm(id){
+  editingGame=id||null;
+  const g=id?jeu(id):{statut:'Sorti'};
+  document.getElementById('modal').innerHTML=`
+    <div class="detail-body" style="min-height:0">
+      <h2>${id?'Modifier — '+esc(g.titre):'Ajouter un jeu'}</h2>
+      <form onsubmit="saveGame(event)" class="form-grid">
+        <div class="form-row w100"><label>Titre *</label><input name="titre" required value="${esc(g.titre)}"></div>
+        <div class="form-row"><label>Développeur</label><input name="dev" value="${esc(g.dev)}"></div>
+        <div class="form-row"><label>Éditeur</label><input name="editeur" value="${esc(g.editeur)}"></div>
+        <div class="form-row"><label>Date de sortie</label><input type="date" name="date" value="${esc(g.date)}"></div>
+        <div class="form-row"><label>Âge (PEGI)</label><input name="age" placeholder="PEGI 12" value="${esc(g.age)}"></div>
+        <div class="form-row"><label>Prix (€, 0 = gratuit)</label><input type="number" step="0.01" min="0" name="prix" value="${esc(g.prix)}"></div>
+        <div class="form-row"><label>Note /10</label><input type="number" step="0.1" min="0" max="10" name="note" value="${esc(g.note)}"></div>
+        <div class="form-row w100"><label>Plateformes</label><input name="plateformes" placeholder="PC, PS5, Switch…" value="${esc(g.plateformes)}"></div>
+        <div class="form-row w100"><label>Genres</label><input name="genres" placeholder="RPG, Action…" value="${esc(g.genres)}"></div>
+        <div class="form-row w100"><label>Statut</label><select name="statut"><option ${g.statut==='Sorti'?'selected':''}>Sorti</option><option ${g.statut==='À venir'?'selected':''}>À venir</option></select></div>
+        <div class="form-row w100"><label>URL de l'image (jaquette)</label><input name="image" placeholder="https://…" value="${esc(g.image)}"></div>
+        <div class="form-row w100"><label>But du jeu / infos</label><textarea name="description" style="min-height:100px">${esc(g.description)}</textarea></div>
+        <div class="modal-actions w100"><button type="button" class="btn ghost" onclick="closeModal()">Annuler</button><button class="btn">💾 Enregistrer</button></div>
+      </form>
+    </div>`;
+  document.getElementById('modalBg').classList.add('open');
+}
+function saveGame(e){
+  e.preventDefault();
+  const fd=new FormData(e.target), obj={};
+  ['titre','dev','editeur','date','age','prix','note','plateformes','genres','statut','image','description'].forEach(k=>obj[k]=fd.get(k)||'');
+  obj.prix=Number(obj.prix)||0; obj.note=Number(obj.note)||0;
+  if(editingGame){ Object.assign(jeu(editingGame),obj); toast('Fiche modifiée ✅'); }
+  else{ obj.id='g'+Date.now(); db.games.push(obj); toast('Jeu ajouté 🎮'); }
+  persist(); closeModal(); render();
+}
+function delGame(id){
+  if(!confirm('Supprimer ce jeu et ses fiches ?')) return;
+  db.games=db.games.filter(g=>g.id!==id);
+  db.entries=db.entries.filter(e=>e.gameId!==id);
+  persist(); closeModal(); toast('Supprimé 🗑️'); render();
+}
+
+function openEntryForm(id){
+  editingEntry=id||null;
+  const e=id?db.entries.find(x=>x.id===id):{type:gestionTab};
+  const fields={
+    astuces:[['jeu','Jeu (sélection)'],['categorie','Catégorie']],
+    cheats:[['jeu','Jeu (sélection)'],['plateforme','Plateforme']],
+    bugs:[['jeu','Jeu (sélection)'],['severite','Gravité'],['statutTag','Statut']],
+    projets:[['type','Type'],['avancement','Avancement (%)'],['statutTag','Statut']]
+  }[e.type]||[];
+  document.getElementById('modal').innerHTML=`
+    <div class="detail-body" style="min-height:0">
+      <h2>${id?'Modifier':'Ajouter'} — ${{astuces:'💡 Astuce',cheats:'🔓 Cheat',bugs:'🐞 Bug',projets:'🛠️ Projet'}[e.type]}</h2>
+      <form onsubmit="saveEntry(event)">
+        <div class="form-row"><label>Titre *</label><input name="titre" required value="${esc(e.titre)}"></div>
+        <div class="form-grid">
+          <div class="form-row"><label>Jeu lié</label><select name="gameId"><option value="">—</option>${db.games.map(g=>`<option value="${g.id}" ${e.gameId===g.id?'selected':''}>${esc(g.titre)}</option>`).join('')}</select></div>
+          ${fields.filter(f=>!['jeu'].includes(f[0])).map(([k,l])=>{
+            if(k==='severite'||k==='statutTag'||k==='type'||k==='categorie'){
+              const opts={severite:['Critique','Majeur','Mineur'],statutTag:['Ouvert','En cours','Corrigé','Contourné','Idée','En pause','Terminé'],type:['Mod','Fan-game','Speedrun','Guide','Serveur','Autre'],categorie:['Progression','Build','Argent','Exploration','Multi','Autre']}[k];
+              return `<div class="form-row"><label>${l}</label><select name="${k}">${opts.map(o=>`<option ${o===e[k]?'selected':''}>${o}</option>`).join('')}</select></div>`;
+            }
+            return `<div class="form-row"><label>${l}</label><input name="${k}" type="${k==='avancement'?'number':'text'}" ${k==='avancement'?'min="0" max="100"':''} value="${esc(e[k])}"></div>`;
+          }).join('')}
+        </div>
+        <div class="form-row"><label>Contenu</label><textarea name="contenu" style="min-height:110px">${esc(e.contenu)}</textarea></div>
+        <div class="modal-actions"><button type="button" class="btn ghost" onclick="closeModal()">Annuler</button><button class="btn">💾 Enregistrer</button></div>
+      </form>
+    </div>`;
+  document.getElementById('modalBg').classList.add('open');
+}
+function saveEntry(ev){
+  ev.preventDefault();
+  const fd=new FormData(ev.target), obj={type:gestionTab};
+  ['titre','gameId','categorie','plateforme','severite','statutTag','type','avancement','contenu'].forEach(k=>{const v=fd.get(k);if(v!=null)obj[k]=v;});
+  if(editingEntry) Object.assign(db.entries.find(x=>x.id===editingEntry),obj);
+  else{ obj.id='e'+Date.now(); db.entries.push(obj); }
+  persist(); closeModal(); toast('Enregistré ✅'); render();
+}
+function delEntry(id){ if(!confirm('Supprimer ?'))return; db.entries=db.entries.filter(e=>e.id!==id); persist(); toast('Supprimé 🗑️'); render(); }
+
+function exportData(){
+  const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='noir-games.json'; a.click();
+}
+function importData(inp){
+  const f=inp.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{ try{
+    const d=JSON.parse(r.result);
+    if(Array.isArray(d.games)) db.games=d.games;
+    if(Array.isArray(d.entries)) db.entries=d.entries;
+    persist(); render(); toast('Import réussi ✅');
+  }catch{ toast('Fichier invalide ❌'); } };
+  r.readAsText(f);
+}
+
+render();
+</script>
+</body>
+</html>
