@@ -5,11 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ROAD VICE — Palm City</title>
 <link rel="stylesheet" href="style.css">
+<script>
+  window.__rvBooted = false;
+  setTimeout(function () {
+    if (!window.__rvBooted) {
+      var el = document.getElementById('loading');
+      if (el) el.textContent = "Chargement impossible : soit ton navigateur est trop vieux (il faut iOS 16.4+ / Chrome ou Edge récent), soit un bloqueur de pub bloque le jeu. Désactive-le pour ce site.";
+    }
+  }, 9000);
+</script>
 <script type="importmap">
 {
   "imports": {
-    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    "three": "./vendor/three.module.js",
+    "three/addons/": "./vendor/jsm/"
   }
 }
 </script>

@@ -17,6 +17,8 @@ import { GameAudio } from './audio.js';
 import { Weather } from './weather.js';
 import { Animals } from './animals.js';
 
+window.__rvBooted = true;
+
 const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
 const smallPhone = isTouch && Math.min(screen.width || 9999, screen.height || 9999) < 480;
 if (isTouch) document.getElementById('thint').textContent =
