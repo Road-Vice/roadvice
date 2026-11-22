@@ -121,31 +121,16 @@ tr:hover td{background:var(--panel)}
   <div class="modal" id="modal"></div>
 </div>
 <div class="toast" id="toast"></div>
-
+<script src="data.js"></script>
 <script>
 const STEAM=a=>`https://cdn.cloudflare.steamstatic.com/steam/apps/${a}/library_600x900_2x.jpg`;
 
-const SEED=[
- {titre:"Cyberpunk 2077",dev:"CD Projekt Red",editeur:"CD Projekt",date:"2020-12-10",age:"PEGI 18",prix:29.99,plateformes:"PC, PS5, Xbox Series",genres:"RPG, Action",note:8.4,appid:1091500,statut:"Sorti",description:"Dans Night City, tu incarne V, un mercenaire traquant une implantation qui confère l'immortalité. Monde ouvert futuriste, choix moraux, extensions (Phantom Liberty)."},
- {titre:"GTA V",dev:"Rockstar North",editeur:"Rockstar Games",date:"2015-04-14",age:"PEGI 18",prix:29.99,plateformes:"PC, PS5, Xbox Series",genres:"Action, Monde ouvert",note:9.0,appid:271590,statut:"Sorti",description:"Trois criminels à Los Santos : braquages, GTA Online heists, monde ouvert vibrant. Le mode Online reçoit toujours du contenu."},
- {titre:"Red Dead Redemption 2",dev:"Rockstar Studios",editeur:"Rockstar Games",date:"2019-11-05",age:"PEGI 18",prix:59.99,plateformes:"PC, PS4, Xbox One",genres:"Action, Aventure",note:9.6,appid:1174180,statut:"Sorti",description:"Arthur Morgan et la bande de Dutch en fuite à la fin du far-west. Histoire poignante, monde ouvert ultra détaillé, Red Dead Online."},
- {titre:"Elden Ring",dev:"FromSoftware",editeur:"Bandai Namco",date:"2022-02-25",age:"PEGI 16",prix:59.99,plateformes:"PC, PS5, Xbox Series",genres:"RPG, Souls",note:9.5,appid:1245620,statut:"Sorti",description:"Deviens Sans-tache et explore l'Entre-terre : monde ouvert sombre, boss colossaux, DLC Shadow of the Erdtree."},
- {titre:"Baldur's Gate 3",dev:"Larian Studios",editeur:"Larian",date:"2023-08-03",age:"PEGI 18",prix:59.99,plateformes:"PC, PS5, Xbox Series",genres:"RPG",note:9.7,appid:1086940,statut:"Sorti",description:"RPG basé sur D&D 5e : ton équipe est infectée par un ver cérébral. Liberté totale, réactions en chaîne, co-op jusqu'à 4."},
- {titre:"The Witcher 3",dev:"CD Projekt Red",editeur:"CD Projekt",date:"2015-05-19",age:"PEGI 18",prix:39.99,plateformes:"PC, PS5, Switch",genres:"RPG, Aventure",note:9.4,appid:292030,statut:"Sorti",description:"Geralt de Riv chasse les monstres et cherche Ciri. Quêtes narratives de référence, GOTY avec Blood & Wine."},
- {titre:"Hollow Knight",dev:"Team Cherry",editeur:"Team Cherry",date:"2017-02-24",age:"PEGI 7",prix:14.99,plateformes:"PC, Switch, PS4",genres:"Metroidvania",note:9.3,appid:367520,statut:"Sorti",description:"Un petit scarabée explore Hallownest, royaume déchu souterrain. Plateforme exigeante, atmosphère mélancolique, Hollow Knight: Silksong en suite."},
- {titre:"Hades",dev:"Supergiant Games",editeur:"Supergiant",date:"2020-09-17",age:"PEGI 12",prix:24.99,plateformes:"PC, Switch, PS5",genres:"Rogue-lite",note:9.0,appid:1145360,statut:"Sorti",description:"Zagreus, fils d'Hadès, tente de s'échapper des Enfers : chaque mort renforce ses pouvoirs. Combat nerveux, DV indie culte."},
- {titre:"Stardew Valley",dev:"ConcernedApe",editeur:"ConcernedApe",date:"2016-02-26",age:"PEGI 7",prix:14.99,plateformes:"PC, Switch, Mobile",genres:"Farm, Vie tranquille",note:9.0,appid:413150,statut:"Sorti",description:"Tu hérites d'une ferme à Stardew : culture, pêche, mines, mariage. Update 1.6 ajoute des festivals, 1.7 prépare le mode multi."},
- {titre:"Counter-Strike 2",dev:"Valve",editeur:"Valve",date:"2023-09-27",age:"PEGI 18",prix:0,plateformes:"PC",genres:"FPS, Compétitif",note:8.0,appid:730,statut:"Sorti",description:"Le FPS compétitif de référence rebâti sur Source 2 : 5v5, système de rangs, économie de skins. Gratuit."},
- {titre:"Dota 2",dev:"Valve",editeur:"Valve",date:"2013-07-09",age:"PEGI 12",prix:0,plateformes:"PC",genres:"MOBA",note:8.0,appid:570,statut:"Sorti",description:"MOBA 5v5 : 126 héros, méta désormais sans limites, tournois au prize-pool record (The International). Gratuit."},
- {titre:"Portal 2",dev:"Valve",editeur:"Valve",date:"2011-04-19",age:"PEGI 12",prix:9.99,plateformes:"PC",genres:"Puzzle",note:9.4,appid:620,statut:"Sorti",description:"Puzzle à portails avec GLaDOS et Wheatley. Co-op dédiée, atelier de niveaux, humour et vitesses légendaires."},
- {titre:"Grand Theft Auto VI",dev:"Rockstar Games",editeur:"Rockstar Games",date:"2026-11-19",age:"PEGI 18",prix:79.99,plateformes:"PS5, Xbox Series",genres:"Action, Monde ouvert",note:0,appid:0,statut:"À venir",description:"Retour à Vice City avec Lucia et Jason : le premier duo féminin de la franchise. Sortie attendue le 19 novembre 2026."}
-];
+const SEED=(typeof GAMES_DB!=='undefined')?GAMES_DB:[];
 
 const SKEY='noir-games-v1';
 let db=JSON.parse(localStorage.getItem(SKEY)||'null');
 if(!db){
-  db={
-    games:SEED.map((g,i)=>({...g,id:'g'+i,image:g.appid?STEAM(g.appid):''})),
+  db={games:SEED.map((g,i)=>({...g,id:g.id||'g'+i})),
     entries:[]
   };
   persist();
