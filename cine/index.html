@@ -178,7 +178,7 @@ function render(){
 
   if(vue==='accueil'){
     const tip=document.getElementById('ft')?.value||'';
-    const genres=[...new Set(db.cars.flatMap(c=>(c.moteur||'').split(' / ').map(g=>g.trim()))).filter(Boolean)].sort();
+    const genres=[...new Set(db.cars.flatMap(c=>(c.moteur||'').split(' / ').map(g=>g.trim()).filter(Boolean)))].sort();
     const gen=document.getElementById('fg')?.value||'';
     const cars=db.cars.filter(c=>full(c).toLowerCase().includes(q)&&( !tip||c.type===tip )&&( !gen||(c.moteur||'').includes(gen) ));
     M.innerHTML=`<h2 class="section">🎬 Films & séries <span class="pill">${cars.length}</span></h2>
@@ -210,7 +210,7 @@ function render(){
       <td>${c.statut==='À venir'?'<span class="pill soon">À venir</span>':'<span class="pill free">Dispo</span>'}</td></tr>`;
     M.innerHTML=`<h2 class="section">🆕 Récentes & à venir</h2>
       ${rec.length?`<table><tr><th>Titre</th><th>Année</th><th>Durée</th><th>Prix</th><th>Dispo</th></tr>${rec.map(row).join('')}</table>`:'<div class="empty">Aucune nouveauté répertoriée.</div>'}
-      <h2 class="section" style="margin-top:34px"> HOURGLASS Les autres</h2>
+      <h2 class="section" style="margin-top:34px">⌛ Les autres</h2>
       <table><tr><th>Titre</th><th>Année</th><th>Durée</th><th>Prix</th><th>Dispo</th></tr>${anc.map(row).join('')}</table>`;
     return;
   }
